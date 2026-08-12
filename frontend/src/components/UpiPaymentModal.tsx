@@ -67,30 +67,30 @@ export function UpiPaymentModal({
 
         <div className="space-y-6 pt-2">
           {/* Payment Method Selector Tabs */}
-          <div className="grid grid-cols-3 gap-2 bg-secondary p-1.5 rounded-2xl">
+          <div className="grid grid-cols-3 gap-1.5 sm:gap-2 bg-secondary p-1.5 rounded-2xl">
             <button
               onClick={() => setMethod('UPI')}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-bold rounded-xl transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1.5 sm:px-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all ${
                 method === 'UPI' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <QrCode className="h-4 w-4" /> UPI / QR
+              <QrCode className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" /> UPI / QR
             </button>
             <button
               onClick={() => setMethod('CARD')}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-bold rounded-xl transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1.5 sm:px-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all ${
                 method === 'CARD' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <CreditCard className="h-4 w-4" /> Card
+              <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" /> Card
             </button>
             <button
               onClick={() => setMethod('NETBANKING')}
-              className={`flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-bold rounded-xl transition-all ${
+              className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1.5 sm:px-3 text-[11px] sm:text-xs font-bold rounded-xl transition-all ${
                 method === 'NETBANKING' ? 'bg-white text-primary shadow-sm' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              <Landmark className="h-4 w-4" /> NetBanking
+              <Landmark className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0" /> Banking
             </button>
           </div>
 

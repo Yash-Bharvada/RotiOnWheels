@@ -184,7 +184,7 @@ export function ImpactDeckModal({ isOpen, onClose }: { isOpen: boolean; onClose:
         </div>
 
         {/* Main Slide Content */}
-        <div className="p-6 sm:p-10 min-h-[360px] flex flex-col justify-between">
+        <div className="p-5 sm:p-10 flex-1 overflow-y-auto flex flex-col justify-between max-h-[calc(90vh-100px)]">
           <AnimatePresence mode="wait">
             <motion.div
               key={slide.id}
@@ -192,15 +192,15 @@ export function ImpactDeckModal({ isOpen, onClose }: { isOpen: boolean; onClose:
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.3 }}
-              className="space-y-6"
+              className="space-y-5 sm:space-y-6"
             >
-              <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-primary">
-                  <Icon className="h-6 w-6" />
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-orange-100 text-primary">
+                  <Icon className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
                 <div>
-                  <h3 className="font-display text-2xl font-bold sm:text-3xl text-foreground">{slide.title}</h3>
-                  <p className="text-sm text-muted-foreground mt-1">{slide.subtitle}</p>
+                  <h3 className="font-display text-xl sm:text-3xl font-bold text-foreground leading-tight">{slide.title}</h3>
+                  <p className="text-xs sm:text-sm text-muted-foreground mt-0.5 sm:mt-1">{slide.subtitle}</p>
                 </div>
               </div>
 
@@ -209,36 +209,38 @@ export function ImpactDeckModal({ isOpen, onClose }: { isOpen: boolean; onClose:
           </AnimatePresence>
 
           {/* Footer Controls */}
-          <div className="flex items-center justify-between pt-6 border-t mt-6">
-            <div className="flex items-center gap-1.5">
+          <div className="flex items-center justify-between pt-5 sm:pt-6 border-t mt-6 gap-2">
+            <div className="flex items-center gap-1 sm:gap-1.5">
               {slides.map((_, idx) => (
                 <button
                   key={idx}
                   onClick={() => setCurrentSlide(idx)}
                   className={`h-2 rounded-full transition-all ${
-                    idx === currentSlide ? 'w-8 bg-primary' : 'w-2 bg-muted-foreground/30'
+                    idx === currentSlide ? 'w-6 sm:w-8 bg-primary' : 'w-2 bg-muted-foreground/30'
                   }`}
                 />
               ))}
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               <Button
                 variant="outline"
                 size="sm"
+                className="px-2.5 sm:px-3 text-xs"
                 disabled={currentSlide === 0}
                 onClick={() => setCurrentSlide((prev) => prev - 1)}
               >
-                <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+                <ChevronLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-0.5 sm:mr-1" /> Prev
               </Button>
               {currentSlide < slides.length - 1 ? (
                 <Button
                   size="sm"
+                  className="px-3 sm:px-4 text-xs"
                   onClick={() => setCurrentSlide((prev) => prev + 1)}
                 >
-                  Next <ChevronRight className="h-4 w-4 ml-1" />
+                  Next <ChevronRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-0.5 sm:ml-1" />
                 </Button>
               ) : (
-                <Button size="sm" onClick={onClose}>
+                <Button size="sm" className="px-3 sm:px-4 text-xs font-bold" onClick={onClose}>
                   Done
                 </Button>
               )}
