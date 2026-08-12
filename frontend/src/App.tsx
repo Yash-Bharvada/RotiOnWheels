@@ -62,7 +62,7 @@ import { ThreeHeroCanvas } from '@/components/ThreeHeroCanvas'
 import { FadeIn, ScaleIn, StaggerContainer, StaggerItem, FloatingCard } from '@/components/FramerComponents'
 import { ImpactDeckModal } from '@/components/ImpactDeckModal'
 import { BannerGenerator } from '@/components/BannerGenerator'
-import { RotiGame } from '@/components/RotiGame'
+import { SevaGalleryCarousel } from '@/components/SevaGalleryCarousel'
 import { ImpactCalculator } from '@/components/ImpactCalculator'
 import { UpiPaymentModal } from '@/components/UpiPaymentModal'
 import { SevaLoader } from '@/components/SevaLoader'
@@ -91,9 +91,9 @@ function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
   const links = [
     ['About', '/#about'],
     ['Impact', '/#impact'],
+    ['Seva Gallery', '/#gallery'],
     ['Live Tracking', '/#tracking'],
     ['Calculator', '/#calculator'],
-    ['Seva Game', '/#game'],
     ['Social Badge', '/#banner'],
     ['FAQs', '/#faqs']
   ]
@@ -593,6 +593,9 @@ function Home() {
           </div>
         </section>
 
+        {/* SEVA GALLERY CAROUSEL (RIGHT DOWN THE NUMBER COUNTER) */}
+        <SevaGalleryCarousel />
+
         {/* LIVE MAP TRACKING WIDGET */}
         <TrackingWidget />
 
@@ -649,11 +652,6 @@ function Home() {
           </FadeIn>
         </section>
 
-        {/* SEVA MINI GAME CHALLENGE */}
-        <section id="game" className="scroll-mt-20 mx-auto max-w-7xl px-5 py-12 lg:px-8">
-          <RotiGame />
-        </section>
-
         {/* SOCIAL BANNER GENERATOR */}
         <section id="banner" className="scroll-mt-20 mx-auto max-w-7xl px-5 py-12 lg:px-8">
           <BannerGenerator />
@@ -685,20 +683,20 @@ function Home() {
         </section>
 
         {/* CTA BANNER */}
-        <section className="mx-auto mb-24 max-w-7xl px-5 lg:px-8">
-          <ScaleIn className="rounded-3xl bg-[#261d17] p-8 text-white sm:p-12 shadow-2xl border border-white/10 relative overflow-hidden">
-            <div className="flex flex-col justify-between gap-8 sm:flex-row sm:items-center relative z-10">
+        <section className="mx-auto mb-12 sm:mb-24 max-w-7xl px-4 sm:px-5 lg:px-8">
+          <ScaleIn className="rounded-2xl sm:rounded-3xl bg-[#261d17] p-5 sm:p-12 text-white shadow-2xl border border-white/10 relative overflow-hidden">
+            <div className="flex flex-col justify-between gap-6 sm:gap-8 sm:flex-row sm:items-center relative z-10">
               <div>
-                <p className="text-xs font-bold uppercase tracking-[.2em] text-orange-300">
+                <p className="text-[10px] sm:text-xs font-bold uppercase tracking-[.2em] text-orange-300">
                   One Meal. One Neighbor. One Brighter Day.
                 </p>
-                <h2 className="mt-3 max-w-xl font-display text-3xl font-bold sm:text-5xl">
+                <h2 className="mt-2 sm:mt-3 max-w-xl font-display text-2xl sm:text-4xl lg:text-5xl font-bold leading-tight">
                   Help Us Keep the Wheels Turning.
                 </h2>
               </div>
-              <Link to="/donate">
-                <Button size="lg" className="shadow-xl glow-orange font-bold text-base">
-                  Sponsor Meals Now <ArrowRight className="h-5 w-5 ml-2" />
+              <Link to="/donate" className="w-full sm:w-auto shrink-0">
+                <Button size="lg" className="shadow-xl glow-orange font-bold text-sm sm:text-base w-full sm:w-auto px-6 h-11 sm:h-12">
+                  Sponsor Meals Now <ArrowRight className="h-4 w-4 sm:h-5 sm:w-5 ml-1.5 sm:ml-2" />
                 </Button>
               </Link>
             </div>
@@ -753,7 +751,20 @@ function Donation() {
   const [error, setError] = useState('')
   const [saveError, setSaveError] = useState('')
   const [reference, setReference] = useState('')
+  const [isCustom, setIsCustom] = useState(false)
   const navigate = useNavigate()
+
+  const handleTierChange = (value: string) => {
+    if (value === 'custom') {
+      setIsCustom(true)
+      if (donationTiers.some((t) => t.amount === donor.amount)) {
+        update('amount', 1500)
+      }
+    } else {
+      setIsCustom(false)
+      update('amount', Number(value))
+    }
+  }
 
   // Scroll to top on route mount and when donation succeeds
   useEffect(() => {
@@ -931,10 +942,8 @@ function Donation() {
                 </CardHeader>
                 <CardContent>
                   <RadioGroup
-                    value={selectedTier ? String(donor.amount) : 'custom'}
-                    onValueChange={(value: string) => {
-                      if (value !== 'custom') update('amount', Number(value))
-                    }}
+                    value={isCustom ? 'custom' : String(donor.amount)}
+                    onValueChange={handleTierChange}
                     className="gap-3"
                   >
                     {donationTiers.map((tier) => (
@@ -942,10 +951,11 @@ function Donation() {
                         key={tier.amount}
                         className={cn(
                           'flex cursor-pointer items-center justify-between rounded-2xl border p-4 transition-all',
-                          donor.amount === tier.amount
+                          !isCustom && donor.amount === tier.amount
                             ? 'border-primary bg-orange-50 ring-2 ring-primary/20'
                             : 'hover:border-primary/50'
                         )}
+                        onClick={() => setIsCustom(false)}
                       >
                         <div className="flex items-center gap-3">
                           <RadioGroupItem value={String(tier.amount)} />
@@ -960,23 +970,38 @@ function Donation() {
                       </label>
                     ))}
 
-                    <div className={cn('mt-1 rounded-2xl border p-4', !selectedTier && 'border-primary bg-orange-50')}>
+                    <div
+                      className={cn(
+                        'rounded-2xl border p-4 transition-all cursor-pointer',
+                        isCustom ? 'border-primary bg-orange-50 ring-2 ring-primary/20' : 'hover:border-primary/50'
+                      )}
+                      onClick={() => {
+                        if (!isCustom) handleTierChange('custom')
+                      }}
+                    >
                       <div className="flex items-center gap-3">
-                        <RadioGroupItem onClick={() => update('amount', 5000)} value="custom" />
-                        <div className="flex-1">
-                          <Label htmlFor="custom" className="font-bold">Custom Amount</Label>
-                          {!selectedTier && (
-                            <Input
-                              id="custom"
-                              type="number"
-                              min="100"
-                              className="mt-2 bg-white"
-                              value={donor.amount}
-                              onChange={(e) => update('amount', Number(e.target.value))}
-                            />
-                          )}
-                        </div>
+                        <RadioGroupItem value="custom" />
+                        <span className="font-bold text-foreground">Custom Amount</span>
                       </div>
+                      {isCustom && (
+                        <div className="mt-3 pt-3 border-t border-orange-200/60" onClick={(e) => e.stopPropagation()}>
+                          <Label htmlFor="custom" className="text-xs font-semibold text-muted-foreground">Enter Amount in ₹</Label>
+                          <Input
+                            id="custom"
+                            type="number"
+                            min="10"
+                            step="50"
+                            className="mt-1 bg-white font-bold text-lg border-orange-300 focus-visible:ring-primary"
+                            value={donor.amount || ''}
+                            onChange={(e) => update('amount', Math.max(0, Number(e.target.value)))}
+                            placeholder="e.g. 1500"
+                            autoFocus
+                          />
+                          <p className="mt-2 text-xs text-primary font-bold">
+                            Sponsors {Math.floor((donor.amount || 0) / 10)} fresh rotis
+                          </p>
+                        </div>
+                      )}
                     </div>
                   </RadioGroup>
 
@@ -1088,7 +1113,9 @@ export default function App() {
       </AnimatePresence>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/donate" element={<Donation />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/donate" element={<Donation />} />
+        </Route>
         <Route path="/login" element={<AuthPage initialMode="login" />} />
         <Route path="/signup" element={<AuthPage initialMode="signup" />} />
         <Route path="/auth/callback" element={<AuthCallback />} />

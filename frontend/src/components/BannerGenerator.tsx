@@ -164,8 +164,8 @@ export function BannerGenerator() {
             </div>
           </div>
 
-          <Button className="w-full mt-4 h-auto py-3 px-4 text-xs sm:text-sm font-bold shadow-lg glow-orange" onClick={downloadBanner}>
-            <Download className="h-4 w-4 mr-2 shrink-0" /> Download High-Res Badge (PNG)
+          <Button className="w-full mt-4 h-11 sm:h-12 px-3 sm:px-4 text-[11px] sm:text-sm font-bold shadow-lg glow-orange whitespace-nowrap flex items-center justify-center" onClick={downloadBanner}>
+            <Download className="h-3.5 w-3.5 sm:h-4 sm:w-4 mr-1.5 sm:mr-2 shrink-0" /> Download High-Res Badge (PNG)
           </Button>
         </div>
 
