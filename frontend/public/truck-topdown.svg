@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 200" width="50" height="100">
+  <defs>
+    <filter id="shadow" x="-20%" y="-10%" width="140%" height="130%">
+      <feDropShadow dx="0" dy="6" stdDeviation="5" flood-color="#000000" flood-opacity="0.4"/>
+    </filter>
+    <linearGradient id="cabGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#f97316"/>
+      <stop offset="100%" stop-color="#c2410c"/>
+    </linearGradient>
+  </defs>
+
+  <g filter="url(#shadow)">
+    <!-- Wheels -->
+    <rect x="6" y="36" width="14" height="30" rx="5" fill="#1c1917"/>
+    <rect x="80" y="36" width="14" height="30" rx="5" fill="#1c1917"/>
+    <rect x="6" y="142" width="14" height="30" rx="5" fill="#1c1917"/>
+    <rect x="80" y="142" width="14" height="30" rx="5" fill="#1c1917"/>
+
+    <!-- Chassis Base -->
+    <rect x="16" y="12" width="68" height="176" rx="8" fill="#e7e5e4"/>
+
+    <!-- Front Cab -->
+    <path d="M 20 28 C 20 14, 30 8, 50 8 C 70 8, 80 14, 80 28 L 80 78 L 20 78 Z" fill="url(#cabGrad)"/>
+
+    <!-- Side Mirrors -->
+    <path d="M 20 18 L 12 14 L 12 38 L 20 38 Z" fill="#292524"/>
+    <path d="M 80 18 L 88 14 L 88 38 L 80 38 Z" fill="#292524"/>
+
+    <!-- Headlights -->
+    <rect x="24" y="10" width="14" height="7" rx="2" fill="#fef08a"/>
+    <rect x="62" y="10" width="14" height="7" rx="2" fill="#fef08a"/>
+
+    <!-- Windshield -->
+    <path d="M 26 32 C 32 24, 68 24, 74 32 L 72 48 C 65 42, 35 42, 28 48 Z" fill="#1e293b"/>
+    <!-- Glass Highlight -->
+    <path d="M 30 30 C 40 26, 56 26, 64 30 C 58 36, 42 38, 30 36 Z" fill="#38bdf8" opacity="0.4"/>
+
+    <!-- Cargo Bed Body -->
+    <rect x="17" y="78" width="66" height="108" rx="4" fill="url(#bodyGrad)" stroke="#9a3412" stroke-width="1.5"/>
+
+    <!-- Container Ribs -->
+    <line x1="25" y1="92" x2="75" y2="92" stroke="#c2410c" stroke-width="2.5"/>
+    <line x1="25" y1="106" x2="75" y2="106" stroke="#c2410c" stroke-width="2.5"/>
+    <line x1="25" y1="120" x2="75" y2="120" stroke="#c2410c" stroke-width="2.5"/>
+
+    <!-- Hatch Circle -->
+    <circle cx="50" cy="154" r="19" fill="#292524" stroke="#78350f" stroke-width="2"/>
+    <circle cx="50" cy="154" r="15" fill="#44403c"/>
+    <circle cx="50" cy="154" r="9" fill="#1c1917"/>
+    <line x1="31" y1="154" x2="69" y2="154" stroke="#e7e5e4" stroke-width="2.5"/>
+    <line x1="50" y1="135" x2="50" y2="173" stroke="#e7e5e4" stroke-width="2.5"/>
+  </g>
+</svg>
