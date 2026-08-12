@@ -54,6 +54,7 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/context/AuthContext'
 
 import { RollingCounter, AnimatedProgress } from '@/components/RollingCounter'
 import { ThreeHeroCanvas } from '@/components/ThreeHeroCanvas'
@@ -64,31 +65,17 @@ import { RotiGame } from '@/components/RotiGame'
 import { ImpactCalculator } from '@/components/ImpactCalculator'
 import { UpiPaymentModal } from '@/components/UpiPaymentModal'
 import { SevaLoader } from '@/components/SevaLoader'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AuthPage } from '@/pages/Auth'
+import { AuthCallback } from '@/pages/AuthCallback'
+import { ResetPassword } from '@/pages/ResetPassword'
 
 const heroImage = '/roti-community-hero.webp'
 const kitchenImage = '/roti-kitchen.webp'
 
 function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
   const [open, setOpen] = useState(false)
-  const [user, setUser] = useState<any>(null)
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-  }
+  const { user, signOut } = useAuth()
 
   const links = [
     ['About', '/#about'],
@@ -145,7 +132,7 @@ function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={handleSignOut}
+                onClick={signOut}
                 className="text-xs text-muted-foreground hover:text-destructive gap-1 px-2.5"
                 title="Sign Out"
               >
@@ -745,6 +732,7 @@ function Receipt({ donor, reference }: { donor: Donor; reference: string }) {
 
 function Donation() {
   const location = useLocation()
+  const { user } = useAuth()
   const initialAmt = (location.state as any)?.initialAmount || 1000
 
   const [donor, setDonor] = useState<Donor>({
@@ -754,6 +742,17 @@ function Donation() {
     pan: '',
     amount: initialAmt
   })
+
+  // Pre-fill name and email from logged-in user
+  useEffect(() => {
+    if (user) {
+      setDonor((current) => ({
+        ...current,
+        name: current.name || user.user_metadata?.full_name || '',
+        email: current.email || user.email || ''
+      }))
+    }
+  }, [user])
   const [gateway, setGateway] = useState(false)
   const [success, setSuccess] = useState(false)
   const [receipt, setReceipt] = useState(false)
@@ -1043,9 +1042,13 @@ export default function App() {
       </AnimatePresence>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/donate" element={<Donation />} />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/donate" element={<Donation />} />
+        </Route>
         <Route path="/login" element={<AuthPage initialMode="login" />} />
         <Route path="/signup" element={<AuthPage initialMode="signup" />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
       </Routes>
     </>
   )
