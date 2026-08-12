@@ -169,22 +169,22 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
       <div className="absolute top-1/3 -right-32 h-96 w-96 rounded-full bg-orange-300/30 blur-3xl pointer-events-none" />
 
       {/* Top Navbar Header */}
-      <header className="w-full max-w-7xl mx-auto px-6 py-6 flex items-center justify-between z-10">
-        <Link to="/" className="flex items-center gap-3 group">
-          <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md transition-transform group-hover:scale-105 glow-orange">
+      <header className="w-full max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between z-10">
+        <Link to="/" className="flex items-center gap-2.5 sm:gap-3 group">
+          <span className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-2xl bg-primary text-lg sm:text-xl font-bold text-primary-foreground shadow-md transition-transform group-hover:scale-105 glow-orange">
             रोटी
           </span>
-          <span className="text-xl font-bold tracking-tight">
+          <span className="text-lg sm:text-xl font-bold tracking-tight">
             Roti<span className="text-primary">On</span>Wheels
           </span>
         </Link>
-        <Link to="/" className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="h-4 w-4" /> Back to Home
+        <Link to="/" className="flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors">
+          <ArrowLeft className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> <span className="hidden sm:inline">Back to </span>Home
         </Link>
       </header>
 
       {/* Main Content Area */}
-      <main className="flex-1 flex items-center justify-center px-4 py-8 z-10">
+      <main className="flex-1 flex items-center justify-center px-4 py-6 sm:py-8 z-10">
         <div className="w-full max-w-md">
           {/* Main Card */}
           <motion.div
@@ -194,14 +194,14 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
           >
             <Card className="border-0 shadow-2xl bg-white/90 backdrop-blur-xl rounded-3xl overflow-hidden">
               {/* Card Header with Tabs */}
-              <div className="p-6 pb-4 bg-gradient-to-b from-amber-50/60 to-transparent border-b border-amber-100/50">
-                <div className="flex items-center justify-center gap-2 mb-4">
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold">
-                    <Heart className="h-3.5 w-3.5 fill-amber-600 text-amber-600" /> Join Arham Seva Family
+              <div className="p-4 sm:p-6 pb-4 bg-gradient-to-b from-amber-50/60 to-transparent border-b border-amber-100/50">
+                <div className="flex items-center justify-center gap-2 mb-3 sm:mb-4">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] sm:text-xs font-bold">
+                    <Heart className="h-3 w-3 sm:h-3.5 sm:w-3.5 fill-amber-600 text-amber-600" /> Join Arham Seva Family
                   </span>
                 </div>
                 
-                <h1 className="font-display text-2xl font-bold text-center text-foreground">
+                <h1 className="font-display text-xl sm:text-2xl font-bold text-center text-foreground">
                   {isSignUp ? 'Create your Account' : 'Welcome Back'}
                 </h1>
                 <p className="text-xs text-center text-muted-foreground mt-1">
@@ -211,7 +211,7 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
                 </p>
 
                 {/* Tab Switcher */}
-                <div className="grid grid-cols-2 gap-1 p-1 bg-secondary/80 rounded-2xl mt-5">
+                <div className="grid grid-cols-2 gap-1 p-1 bg-secondary/80 rounded-2xl mt-4 sm:mt-5">
                   <button
                     type="button"
                     onClick={() => {
@@ -247,7 +247,7 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
                 </div>
               </div>
 
-              <CardContent className="p-6 sm:p-8 space-y-5">
+              <CardContent className="p-4 sm:p-8 space-y-4 sm:space-y-5">
                 {/* Error Banner */}
                 <AnimatePresence mode="wait">
                   {errorMsg && (

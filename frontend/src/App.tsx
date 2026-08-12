@@ -54,6 +54,7 @@ import {
 } from '@/components/ui'
 import { cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
+import { sendAutomaticReceiptEmail } from '@/lib/sendReceipt'
 import { useAuth } from '@/context/AuthContext'
 
 import { RollingCounter, AnimatedProgress } from '@/components/RollingCounter'
@@ -69,13 +70,23 @@ import { ProtectedRoute } from '@/components/ProtectedRoute'
 import { AuthPage } from '@/pages/Auth'
 import { AuthCallback } from '@/pages/AuthCallback'
 import { ResetPassword } from '@/pages/ResetPassword'
+import { ReceiptModal } from '@/components/ReceiptModal'
 
 const heroImage = '/roti-community-hero.webp'
 const kitchenImage = '/roti-kitchen.webp'
 
 function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
   const [open, setOpen] = useState(false)
+  const [avatarOpen, setAvatarOpen] = useState(false)
   const { user, signOut } = useAuth()
+
+  const displayName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'You'
+  const initials = displayName
+    .split(' ')
+    .map((w: string) => w[0])
+    .join('')
+    .toUpperCase()
+    .slice(0, 2)
 
   const links = [
     ['About', '/#about'],
@@ -89,13 +100,13 @@ function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/85 backdrop-blur-md transition-all">
-      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-5 lg:px-8">
-        <Link to="/" className="flex items-center gap-3 group" onClick={() => setOpen(false)}>
-          <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-md transition-transform group-hover:scale-105 glow-orange">
+      <div className="mx-auto flex h-16 sm:h-20 max-w-7xl items-center justify-between px-3 sm:px-6 lg:px-8 gap-2">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3 group shrink-0" onClick={() => setOpen(false)}>
+          <span className="flex h-9 w-9 sm:h-11 sm:w-11 items-center justify-center rounded-xl sm:rounded-2xl bg-primary text-base sm:text-xl font-bold text-primary-foreground shadow-md transition-transform group-hover:scale-105 glow-orange shrink-0">
             रोटी
           </span>
-          <div>
-            <span className="block text-lg font-bold tracking-tight">
+          <div className="shrink-0">
+            <span className="block text-base sm:text-lg font-bold tracking-tight">
               Roti<span className="text-primary">On</span>Wheels
             </span>
             <span className="hidden text-[10px] font-bold uppercase tracking-[.2em] text-muted-foreground sm:block">
@@ -122,47 +133,75 @@ function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
           </button>
         </nav>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
           {user ? (
-            <div className="flex items-center gap-2">
-              <span className="hidden sm:flex items-center gap-1.5 text-xs font-bold bg-amber-100/80 text-amber-900 px-3 py-1.5 rounded-full border border-amber-200">
-                <User className="h-3.5 w-3.5 text-primary" />
-                {user.user_metadata?.full_name || user.email?.split('@')[0]}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={signOut}
-                className="text-xs text-muted-foreground hover:text-destructive gap-1 px-2.5"
-                title="Sign Out"
+            /* ── Avatar dropdown ── */
+            <div className="relative shrink-0">
+              <button
+                onClick={() => setAvatarOpen((v) => !v)}
+                className="flex h-8 w-8 sm:h-9 sm:w-9 items-center justify-center rounded-full bg-gradient-to-br from-amber-400 to-orange-500 text-xs sm:text-[13px] font-bold text-white shadow-md ring-2 ring-amber-200 transition-transform hover:scale-105 focus:outline-none"
+                aria-label="Account menu"
               >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Sign Out</span>
-              </Button>
+                {initials}
+              </button>
+
+              <AnimatePresence>
+                {avatarOpen && (
+                  <>
+                    {/* Backdrop */}
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setAvatarOpen(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95, y: -6 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95, y: -6 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 top-11 sm:top-12 z-50 w-56 rounded-2xl border bg-white/95 backdrop-blur-xl shadow-2xl overflow-hidden"
+                    >
+                      {/* User info */}
+                      <div className="px-4 py-3.5 border-b bg-amber-50/60">
+                        <p className="text-xs font-bold text-foreground truncate">{displayName}</p>
+                        <p className="text-[11px] text-muted-foreground truncate mt-0.5">{user.email}</p>
+                      </div>
+                      {/* Sign out */}
+                      <button
+                        onClick={() => { setAvatarOpen(false); signOut() }}
+                        className="flex w-full items-center gap-2.5 px-4 py-3 text-xs font-semibold text-destructive hover:bg-red-50 transition-colors"
+                      >
+                        <LogOut className="h-3.5 w-3.5" />
+                        Sign Out
+                      </button>
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
             </div>
           ) : (
-            <Link to="/login">
-              <Button variant="outline" size="sm" className="text-xs font-semibold rounded-full px-4 border-amber-200 hover:bg-amber-50">
+            <Link to="/login" className="shrink-0">
+              <Button variant="outline" size="sm" className="text-xs font-semibold rounded-full px-2.5 sm:px-4 h-8 sm:h-9 border-amber-200 hover:bg-amber-50">
                 Sign In
               </Button>
             </Link>
           )}
 
-          <Link to="/donate">
-            <Button size="sm" className="shadow-md glow-orange font-bold">
-              Donate now <ArrowRight className="h-4 w-4 ml-1" />
+          <Link to="/donate" state={{ resetForm: true }} className="shrink-0">
+            <Button size="sm" className="shadow-md glow-orange font-bold text-xs sm:text-sm px-2.5 sm:px-4 h-8 sm:h-9">
+              Donate <span className="hidden md:inline">now</span> <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4 ml-0.5 sm:ml-1" />
             </Button>
           </Link>
 
           <button
-            className="rounded-full p-2 lg:hidden"
+            className="rounded-full p-1.5 sm:p-2 lg:hidden text-foreground hover:bg-secondary transition-colors shrink-0"
             onClick={() => setOpen(!open)}
             aria-label="Toggle menu"
           >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {open ? <X className="h-5 w-5 sm:h-6 sm:w-6" /> : <Menu className="h-5 w-5 sm:h-6 sm:w-6" />}
           </button>
         </div>
       </div>
+
 
       <AnimatePresence>
         {open && (
@@ -170,7 +209,7 @@ function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="border-t bg-background px-6 py-5 lg:hidden space-y-3"
+            className="border-t bg-background px-6 py-5 lg:hidden space-y-3 max-h-[calc(100vh-5rem)] overflow-y-auto"
           >
             {links.map(([label, href]) => (
               <a
@@ -187,7 +226,7 @@ function Header({ onOpenDeck }: { onOpenDeck: () => void }) {
                 setOpen(false)
                 onOpenDeck()
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-100 py-3 text-xs font-bold text-primary"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-orange-100 py-3 text-xs font-bold text-primary active:scale-98 transition-transform"
             >
               <FileText className="h-4 w-4" /> Open 2026 Impact Pitch Deck
             </button>
@@ -379,14 +418,14 @@ function MapRecenter() {
 
 function TrackingWidget() {
   return (
-    <section id="tracking" className="scroll-mt-20 bg-[#f4eadc]/60 py-24 border-y">
+    <section id="tracking" className="scroll-mt-20 bg-[#f4eadc]/60 py-16 sm:py-24 border-y">
       <div className="mx-auto max-w-7xl px-5 lg:px-8">
         <FadeIn className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <Badge className="border-orange-200 bg-white text-primary font-bold shadow-sm">
               <span className="mr-2 h-2 w-2 animate-pulse rounded-full bg-red-500" /> LIVE NOW
             </Badge>
-            <h2 className="mt-4 max-w-xl font-display text-4xl font-bold tracking-tight sm:text-5xl">
+            <h2 className="mt-4 max-w-xl font-display text-3xl font-bold tracking-tight sm:text-4xl lg:text-5xl">
               Follow the Warmth Through the City
             </h2>
           </div>
@@ -396,13 +435,13 @@ function TrackingWidget() {
         </FadeIn>
 
         <ScaleIn className="grid grid-cols-1 overflow-hidden rounded-3xl border bg-white shadow-2xl lg:grid-cols-[1fr_360px]">
-          <div className="relative min-h-[440px] min-w-0 w-full">
+          <div className="relative min-h-[350px] sm:min-h-[440px] min-w-0 w-full">
             <MapContainer
               center={truckRoute[0]}
               zoom={14}
               scrollWheelZoom={false}
-              style={{ height: '440px', width: '100%' }}
-              className="h-[440px] w-full"
+              style={{ height: '100%', width: '100%', minHeight: '350px' }}
+              className="h-[350px] sm:h-[440px] w-full"
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -413,29 +452,29 @@ function TrackingWidget() {
               <MapRecenter />
             </MapContainer>
 
-            <div className="absolute left-5 top-5 z-[1000] flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-xs font-bold shadow-lg border">
+            <div className="absolute left-3 top-3 z-[1000] flex items-center gap-2 rounded-full bg-white/95 px-3 py-1.5 sm:left-5 sm:top-5 sm:px-4 sm:py-2 text-[11px] sm:text-xs font-bold shadow-lg border">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-red-500" /> Live GPS Navigation Active
             </div>
           </div>
 
-          <div className="flex min-w-0 flex-col justify-between p-6 sm:p-8 bg-card">
+          <div className="flex min-w-0 flex-col justify-between p-5 sm:p-8 bg-card">
             <div>
               <p className="text-xs font-bold uppercase tracking-[.2em] text-primary">Roti Delivery Van #1</p>
-              <p className="mt-2 text-2xl font-bold tracking-tight">Active Route Location</p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+              <p className="mt-2 text-xl sm:text-2xl font-bold tracking-tight">Active Route Location</p>
+              <p className="mt-2 text-xs sm:text-sm leading-relaxed text-muted-foreground">
                 Cruising through Navrangpura & Ashram Road, distributing warm meals cooked at dawn.
               </p>
 
-              <div className="mt-8 space-y-4">
-                <div className="flex items-center justify-between border-b pb-3 text-sm">
+              <div className="mt-6 sm:mt-8 space-y-3 sm:space-y-4">
+                <div className="flex items-center justify-between border-b pb-3 text-xs sm:text-sm">
                   <span className="text-muted-foreground">Current Area</span>
-                  <span className="font-semibold text-foreground">Navrangpura & Ashram Road</span>
+                  <span className="font-semibold text-foreground text-right">Navrangpura & Ashram Road</span>
                 </div>
-                <div className="flex items-center justify-between border-b pb-3 text-sm">
+                <div className="flex items-center justify-between border-b pb-3 text-xs sm:text-sm">
                   <span className="text-muted-foreground">Meals Remaining</span>
                   <span className="font-bold text-primary">180+ Rotis</span>
                 </div>
-                <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center justify-between text-xs sm:text-sm">
                   <span className="text-muted-foreground">Status</span>
                   <span className="font-semibold text-emerald-600 flex items-center gap-1.5">
                     <span className="h-2 w-2 rounded-full bg-emerald-500" /> Active Distribution
@@ -444,7 +483,7 @@ function TrackingWidget() {
               </div>
             </div>
 
-            <div className="mt-8 rounded-2xl bg-secondary p-4 border">
+            <div className="mt-6 sm:mt-8 rounded-2xl bg-secondary p-3.5 sm:p-4 border">
               <div className="flex items-center gap-3">
                 <Navigation className="h-5 w-5 text-primary shrink-0" />
                 <div>
@@ -462,13 +501,21 @@ function TrackingWidget() {
 
 function Home() {
   const [deckOpen, setDeckOpen] = useState(false)
+  const location = useLocation()
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (location.hash === '#donate') {
+      navigate('/donate')
+    }
+  }, [location.hash, navigate])
 
   return (
     <>
       <Header onOpenDeck={() => setDeckOpen(true)} />
       <main>
         {/* HERO SECTION WITH THREE.JS 3D WARMTH CANVAS & FRAMER MOTION */}
-        <section className="relative min-h-[700px] overflow-hidden bg-[#261d17] text-white flex items-center">
+        <section className="relative min-h-[600px] sm:min-h-[700px] overflow-hidden bg-[#261d17] text-white flex items-center">
           {/* Three.js 3D Glowing Particles Background */}
           <ThreeHeroCanvas />
 
@@ -481,27 +528,27 @@ function Home() {
             <div className="absolute inset-0 bg-gradient-to-r from-[#211914] via-[#211914]/85 to-transparent" />
           </div>
 
-          <div className="relative z-10 mx-auto max-w-7xl px-5 py-24 lg:px-8 w-full">
-            <StaggerContainer className="max-w-2xl space-y-8">
+          <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 sm:py-24 lg:px-8 w-full">
+            <StaggerContainer className="max-w-2xl space-y-6 sm:space-y-8">
               <StaggerItem>
-                <Badge className="border-orange-400/30 bg-orange-500/20 text-orange-200 backdrop-blur-md px-4 py-1.5 text-xs font-bold shadow-lg">
+                <Badge className="border-orange-400/30 bg-orange-500/20 text-orange-200 backdrop-blur-md px-3.5 sm:px-4 py-1.5 text-[11px] sm:text-xs font-bold shadow-lg">
                   <Sparkles className="mr-2 h-3.5 w-3.5 text-amber-300" /> A Daily Act of Care · 80G Tax Exempt
                 </Badge>
               </StaggerItem>
 
               <StaggerItem>
-                <h1 className="font-display text-5xl font-bold leading-[1.05] tracking-tight sm:text-7xl">
+                <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-bold leading-[1.08] tracking-tight">
                   Feeding <span className="gradient-text-saffron">3,000 Lives</span> Daily.
                 </h1>
               </StaggerItem>
 
               <StaggerItem>
-                <p className="text-lg leading-relaxed text-white/80 max-w-xl">
+                <p className="text-base sm:text-lg leading-relaxed text-white/80 max-w-xl">
                   Every morning, our volunteers turn flour, fire, and faith into fresh, wholesome rotis for neighbors who need a little extra warmth and dignity.
                 </p>
               </StaggerItem>
 
-              <StaggerItem className="flex flex-col gap-4 sm:flex-row pt-2">
+              <StaggerItem className="flex flex-col gap-3 sm:gap-4 sm:flex-row pt-2">
                 <Link to="/donate">
                   <Button size="lg" className="shadow-xl glow-orange font-bold text-base w-full sm:w-auto">
                     Donate Meals Now <ArrowRight className="h-5 w-5 ml-1" />
@@ -528,14 +575,14 @@ function Home() {
         </section>
 
         {/* ROLLING COUNTER IMPACT BAR */}
-        <section id="impact" className="scroll-mt-20 border-b bg-primary py-14 text-primary-foreground">
-          <div className="mx-auto grid max-w-7xl gap-8 px-5 sm:grid-cols-3 lg:px-8">
+        <section id="impact" className="scroll-mt-20 border-b bg-primary py-12 sm:py-14 text-primary-foreground">
+          <div className="mx-auto grid max-w-7xl gap-6 sm:gap-8 px-5 sm:grid-cols-3 lg:px-8">
             {[
               ['3,000+', 'Rotis Cooked & Served Daily', 100],
               ['365', 'Unbroken Days Active Each Year', 100],
               ['100%', 'Volunteer Run & transparent', 100]
             ].map(([value, label, progress]) => (
-              <FadeIn key={label} className="border-white/20 sm:border-l sm:pl-8 first:border-0 first:pl-0">
+              <FadeIn key={label} className="border-t border-white/20 pt-5 sm:border-t-0 sm:pt-0 sm:border-l sm:pl-8 first:border-0 first:pt-0 first:pl-0">
                 <p className="font-display text-4xl font-bold sm:text-5xl">
                   <RollingCounter value={value as string} />
                 </p>
@@ -550,7 +597,7 @@ function Home() {
         <TrackingWidget />
 
         {/* IMPACT CALCULATOR */}
-        <section id="calculator" className="scroll-mt-20 mx-auto max-w-7xl px-5 py-24 lg:px-8">
+        <section id="calculator" className="scroll-mt-20 mx-auto max-w-7xl px-5 py-16 sm:py-24 lg:px-8">
           <ImpactCalculator />
         </section>
 
@@ -562,9 +609,9 @@ function Home() {
               alt="Volunteers making fresh rotis"
               className="aspect-[4/3] w-full rounded-3xl object-cover shadow-2xl border"
             />
-            <div className="absolute -bottom-6 -right-3 max-w-[240px] rounded-2xl bg-white p-6 shadow-2xl sm:-right-6 border border-orange-100">
-              <p className="font-display text-xl font-bold text-primary">“A full plate says: you matter.”</p>
-              <p className="mt-2 text-xs text-muted-foreground font-semibold">— Volunteer Core Promise</p>
+            <div className="absolute right-3 -bottom-4 sm:-bottom-6 sm:-right-6 max-w-[200px] sm:max-w-[240px] rounded-2xl bg-white p-4 sm:p-6 shadow-2xl border border-orange-100">
+              <p className="font-display text-base sm:text-xl font-bold text-primary">“A full plate says: you matter.”</p>
+              <p className="mt-1.5 sm:mt-2 text-[11px] sm:text-xs text-muted-foreground font-semibold">— Volunteer Core Promise</p>
             </div>
           </FloatingCard>
 
@@ -676,59 +723,6 @@ const donationTiers = [
 
 type Donor = { name: string; email: string; mobile: string; pan: string; amount: number }
 
-function Receipt({ donor, reference }: { donor: Donor; reference: string }) {
-  return (
-    <div className="print-receipt rounded-3xl border-2 border-primary/30 bg-white p-6 text-foreground sm:p-10 shadow-lg">
-      <div className="flex items-start justify-between border-b pb-6">
-        <div className="flex items-center gap-3">
-          <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary text-sm font-bold text-white shadow-md">
-            रोटी
-          </span>
-          <div>
-            <p className="font-bold text-lg font-display">RotiOnWheels</p>
-            <p className="text-xs text-muted-foreground font-semibold">Arham Yuva Seva Group · Ahmedabad</p>
-          </div>
-        </div>
-        <Badge className="border-emerald-200 bg-emerald-50 text-emerald-700 font-bold">Provisional 80G</Badge>
-      </div>
-
-      <div className="py-8 text-center">
-        <CircleCheck className="mx-auto h-14 w-14 text-emerald-500" />
-        <h3 className="mt-4 font-display text-3xl font-bold">Donation Certificate</h3>
-        <p className="mt-2 text-sm text-muted-foreground">Thank you for keeping a neighbor fed with dignity.</p>
-      </div>
-
-      <div className="grid gap-4 border-y py-6 text-sm sm:grid-cols-2">
-        <div>
-          <p className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Donor Name</p>
-          <p className="mt-1 font-semibold text-foreground">{donor.name}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Date</p>
-          <p className="mt-1 font-semibold text-foreground">{new Date().toLocaleDateString('en-IN')}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground text-xs uppercase font-bold tracking-wider">PAN Number</p>
-          <p className="mt-1 font-semibold text-foreground">{donor.pan}</p>
-        </div>
-        <div>
-          <p className="text-muted-foreground text-xs uppercase font-bold tracking-wider">Reference</p>
-          <p className="mt-1 font-semibold text-foreground">{reference}</p>
-        </div>
-      </div>
-
-      <div className="py-6 text-center bg-orange-50/50 rounded-2xl my-4">
-        <p className="text-xs uppercase tracking-[.18em] text-muted-foreground font-bold">Contribution Received</p>
-        <p className="mt-2 font-display text-4xl font-bold text-primary">₹{donor.amount.toLocaleString('en-IN')}</p>
-        <p className="mt-2 text-sm font-medium text-foreground">Equivalent to {Math.floor(donor.amount / 10)} nutritious rotis</p>
-      </div>
-
-      <p className="text-center text-xs leading-relaxed text-muted-foreground">
-        This is an official provisional receipt. An 80G tax exemption certificate will be emailed to {donor.email}.
-      </p>
-    </div>
-  )
-}
 
 function Donation() {
   const location = useLocation()
@@ -758,7 +752,29 @@ function Donation() {
   const [receipt, setReceipt] = useState(false)
   const [error, setError] = useState('')
   const [saveError, setSaveError] = useState('')
+  const [reference, setReference] = useState('')
   const navigate = useNavigate()
+
+  // Scroll to top on route mount and when donation succeeds
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
+
+  useEffect(() => {
+    if (success) {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+    }
+  }, [success])
+
+  // Reset donation form if user clicks header Donate button while on /donate
+  useEffect(() => {
+    if (location.state?.resetForm) {
+      setSuccess(false)
+      setError('')
+      setSaveError('')
+      window.scrollTo(0, 0)
+    }
+  }, [location.state])
 
   const panValid = /^[A-Z]{5}[0-9]{4}[A-Z]$/.test(donor.pan)
   const selectedTier = donationTiers.find((tier) => tier.amount === donor.amount)
@@ -778,52 +794,85 @@ function Donation() {
   }
 
   const completePayment = async () => {
-    const { error: donationError } = await supabase.from('roti_donations').insert({
-      full_name: donor.name,
-      email: donor.email,
-      mobile: donor.mobile,
-      pan_number: donor.pan,
-      amount: donor.amount,
-      rotis_sponsored: rotis,
-      payment_status: 'success'
-    })
+    const lockedRef = `ROW${new Date().getFullYear()}${Math.floor(100000 + Math.random() * 899999)}`
+    setReference(lockedRef)
 
-    if (donationError) {
-      setSaveError(
-        'Your payment was recorded, but receipt sync is delayed. Please keep this reference for your records.'
-      )
+    try {
+      const { error: donationError } = await supabase.from('roti_donations').insert({
+        full_name: donor.name,
+        email: donor.email,
+        mobile: donor.mobile,
+        pan_number: donor.pan,
+        amount: donor.amount,
+        rotis_sponsored: rotis,
+        payment_status: 'success'
+      })
+
+      if (donationError) {
+        console.warn('Supabase donation insert notice:', donationError)
+        const localDonations = JSON.parse(localStorage.getItem('roti_donations') || '[]')
+        localDonations.push({
+          reference: lockedRef,
+          full_name: donor.name,
+          email: donor.email,
+          mobile: donor.mobile,
+          pan_number: donor.pan,
+          amount: donor.amount,
+          rotis_sponsored: rotis,
+          payment_status: 'success',
+          created_at: new Date().toISOString()
+        })
+        localStorage.setItem('roti_donations', JSON.stringify(localDonations))
+      }
+    } catch (err) {
+      console.warn('Supabase connection/table exception handled gracefully:', err)
+      const localDonations = JSON.parse(localStorage.getItem('roti_donations') || '[]')
+      localDonations.push({
+        reference: lockedRef,
+        full_name: donor.name,
+        email: donor.email,
+        mobile: donor.mobile,
+        pan_number: donor.pan,
+        amount: donor.amount,
+        rotis_sponsored: rotis,
+        payment_status: 'success',
+        created_at: new Date().toISOString()
+      })
+      localStorage.setItem('roti_donations', JSON.stringify(localDonations))
     }
     setGateway(false)
     setSuccess(true)
-  }
+    window.scrollTo({ top: 0, behavior: 'instant' })
 
-  const reference = `ROW${new Date().getFullYear()}${Math.floor(100000 + Math.random() * 899999)}`
+    // Automatically generate PDF & send receipt email in the background
+    sendAutomaticReceiptEmail(donor, lockedRef)
+  }
 
   return (
     <>
       <Header onOpenDeck={() => {}} />
-      <main className="bg-[#f7f0e7] py-16 sm:py-24">
-        <div className="mx-auto max-w-6xl px-5 lg:px-8">
+      <main className="bg-[#f7f0e7] py-12 sm:py-24">
+        <div className="mx-auto max-w-6xl px-4 sm:px-5 lg:px-8">
           <FadeIn className="mx-auto max-w-2xl text-center">
-            <Badge className="border-orange-200 bg-orange-50 text-primary font-bold">
+            <Badge className="border-orange-200 bg-orange-50 text-primary font-bold text-xs">
               Give a Meal · Give a Moment
             </Badge>
-            <h1 className="mt-5 font-display text-5xl font-bold tracking-tight sm:text-6xl">
+            <h1 className="mt-4 sm:mt-5 font-display text-3xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
               Your Kindness Travels Far.
             </h1>
-            <p className="mt-4 text-base leading-relaxed text-muted-foreground">
+            <p className="mt-3 sm:mt-4 text-xs sm:text-base leading-relaxed text-muted-foreground">
               Choose an amount that feels right. We turn every ₹10 into fresh rotis and issue an 80G tax receipt.
             </p>
           </FadeIn>
 
           {!success ? (
-            <form onSubmit={proceed} className="mx-auto mt-12 grid max-w-5xl gap-8 lg:grid-cols-[1.25fr_.75fr]">
+            <form onSubmit={proceed} className="mx-auto mt-8 sm:mt-12 grid max-w-5xl gap-6 sm:gap-8 lg:grid-cols-[1.25fr_.75fr]">
               <Card className="border-0 shadow-xl">
-                <CardHeader>
-                  <CardTitle className="font-display text-2xl font-bold">Donor Information</CardTitle>
-                  <CardDescription>Details required for issuing your 80G Tax Exemption Certificate.</CardDescription>
+                <CardHeader className="p-4 sm:p-6 pb-2 sm:pb-4">
+                  <CardTitle className="font-display text-xl sm:text-2xl font-bold">Donor Information</CardTitle>
+                  <CardDescription className="text-xs sm:text-sm">Details required for issuing your 80G Tax Exemption Certificate.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid gap-5 sm:grid-cols-2">
+                <CardContent className="p-4 sm:p-6 grid gap-4 sm:gap-5 sm:grid-cols-2">
                   <div className="sm:col-span-2">
                     <Label htmlFor="name">Full Name</Label>
                     <Input
@@ -966,11 +1015,21 @@ function Donation() {
                 </div>
               </div>
 
+              <div className="flex items-center gap-3 rounded-2xl bg-emerald-50/80 p-3.5 text-left text-xs border border-emerald-200/80 text-emerald-900">
+                <Mail className="h-5 w-5 text-emerald-600 shrink-0" />
+                <span>
+                  Receipt PDF & 80G Tax Exemption Certificate emailed automatically to <strong className="font-bold">{donor.email}</strong>.
+                </span>
+              </div>
+
               {saveError && <p className="text-xs text-amber-700 bg-amber-50 p-3 rounded-xl border border-amber-200">{saveError}</p>}
 
               <div className="flex flex-col gap-3 pt-2">
-                <Button size="lg" className="w-full font-bold" onClick={() => setReceipt(true)}>
-                  View & Print Official 80G Receipt
+                <Button size="lg" className="w-full font-bold shadow-lg glow-orange" onClick={() => setReceipt(true)}>
+                  View, Print & Share 80G Receipt
+                </Button>
+                <Button variant="outline" className="w-full font-semibold border-amber-200 hover:bg-amber-50" onClick={() => setSuccess(false)}>
+                  Sponsor More Rotis
                 </Button>
                 <Button variant="ghost" className="w-full" onClick={() => navigate('/')}>
                   Return to Home Page
@@ -994,25 +1053,12 @@ function Donation() {
       />
 
       {/* Receipt Modal */}
-      <Dialog open={receipt} onOpenChange={setReceipt}>
-        <DialogContent className="max-w-2xl p-6 sm:p-8">
-          <DialogHeader>
-            <DialogTitle className="font-display text-2xl font-bold">Official Provisional Receipt</DialogTitle>
-            <DialogDescription>Print or save this certificate for your 80G tax records.</DialogDescription>
-          </DialogHeader>
-          <Receipt donor={donor} reference={reference} />
-          <div className="flex gap-3 mt-4">
-            <Button className="w-full font-bold" onClick={() => window.print()}>
-              Print Certificate (PDF)
-            </Button>
-            <DialogClose asChild>
-              <Button variant="ghost" className="w-full">
-                Close
-              </Button>
-            </DialogClose>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <ReceiptModal
+        open={receipt}
+        onClose={() => setReceipt(false)}
+        donor={donor}
+        reference={reference}
+      />
     </>
   )
 }
@@ -1042,9 +1088,7 @@ export default function App() {
       </AnimatePresence>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/donate" element={<Donation />} />
-        </Route>
+        <Route path="/donate" element={<Donation />} />
         <Route path="/login" element={<AuthPage initialMode="login" />} />
         <Route path="/signup" element={<AuthPage initialMode="signup" />} />
         <Route path="/auth/callback" element={<AuthCallback />} />

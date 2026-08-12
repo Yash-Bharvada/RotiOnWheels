@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import { Play, RotateCcw, Trophy, Sparkles, Zap, Flame, ShieldAlert, ArrowRight, Gauge } from 'lucide-react'
 import confetti from 'canvas-confetti'
@@ -418,19 +419,19 @@ export function RotiGame() {
           </div>
 
           {/* Interactive Game Canvas */}
-          <div className="relative overflow-hidden rounded-2xl border-4 border-orange-200 shadow-2xl select-none">
-            <canvas ref={canvasRef} className="w-full h-[360px] object-cover" />
+          <div className="relative overflow-hidden rounded-2xl border-2 sm:border-4 border-orange-200 shadow-2xl select-none">
+            <canvas ref={canvasRef} className="w-full h-[280px] sm:h-[360px] object-cover" />
 
             {/* Mobile / Touch On-Screen Controls */}
-            <div className="absolute bottom-4 left-4 right-4 flex justify-between pointer-events-auto">
+            <div className="absolute bottom-3 sm:bottom-4 left-3 right-3 sm:left-4 sm:right-4 flex justify-between gap-2 pointer-events-auto">
               <button
                 onMouseDown={() => (stateRef.current.brakePressed = true)}
                 onMouseUp={() => (stateRef.current.brakePressed = false)}
                 onTouchStart={() => (stateRef.current.brakePressed = true)}
                 onTouchEnd={() => (stateRef.current.brakePressed = false)}
-                className="px-6 py-4 rounded-2xl bg-red-600/90 text-white font-bold text-sm shadow-xl backdrop-blur-md active:scale-95 transition-transform"
+                className="px-3.5 py-2.5 sm:px-6 sm:py-4 rounded-xl sm:rounded-2xl bg-red-600/90 text-white font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md active:scale-95 transition-transform"
               >
-                ◀ BRAKE / TILT
+                ◀ BRAKE
               </button>
 
               <button
@@ -438,9 +439,9 @@ export function RotiGame() {
                 onMouseUp={() => (stateRef.current.gasPressed = false)}
                 onTouchStart={() => (stateRef.current.gasPressed = true)}
                 onTouchEnd={() => (stateRef.current.gasPressed = false)}
-                className="px-8 py-4 rounded-2xl bg-orange-500/90 text-white font-bold text-sm shadow-xl backdrop-blur-md active:scale-95 transition-transform glow-orange"
+                className="px-4 py-2.5 sm:px-8 sm:py-4 rounded-xl sm:rounded-2xl bg-orange-500/90 text-white font-bold text-xs sm:text-sm shadow-xl backdrop-blur-md active:scale-95 transition-transform glow-orange"
               >
-                GAS / ACCEL ▶
+                GAS ▶
               </button>
             </div>
           </div>
@@ -466,9 +467,9 @@ export function RotiGame() {
             <Button variant="outline" className="w-1/2 font-bold" onClick={startGame}>
               <RotateCcw className="h-4 w-4 mr-2" /> Try Again
             </Button>
-            <a href="#donate" className="w-1/2">
+            <Link to="/donate" className="w-1/2">
               <Button className="w-full font-bold glow-orange">Sponsor Real Rotis</Button>
-            </a>
+            </Link>
           </div>
         </div>
       )}

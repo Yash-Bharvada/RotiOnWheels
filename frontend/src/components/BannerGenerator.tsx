@@ -164,50 +164,50 @@ export function BannerGenerator() {
             </div>
           </div>
 
-          <Button className="w-full mt-4" size="lg" onClick={downloadBanner}>
-            <Download className="h-4 w-4 mr-2" /> Download High-Res Badge (PNG)
+          <Button className="w-full mt-4 h-auto py-3 px-4 text-xs sm:text-sm font-bold shadow-lg glow-orange" onClick={downloadBanner}>
+            <Download className="h-4 w-4 mr-2 shrink-0" /> Download High-Res Badge (PNG)
           </Button>
         </div>
 
         {/* Live Banner Preview */}
-        <div className="space-y-4">
+        <div className="space-y-3 sm:space-y-4">
           <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Live Banner Preview</p>
           <div
-            className={`relative aspect-[1200/630] w-full rounded-2xl bg-gradient-to-br ${selectedStyle.bg} ${selectedStyle.text} p-6 sm:p-10 shadow-2xl flex flex-col justify-between overflow-hidden border border-white/20`}
+            className={`relative aspect-[1200/630] w-full rounded-2xl bg-gradient-to-br ${selectedStyle.bg} ${selectedStyle.text} p-4 sm:p-8 lg:p-10 shadow-2xl flex flex-col justify-between overflow-hidden border border-white/20`}
           >
             {/* Background ambient decorative shapes */}
-            <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-2xl" />
+            <div className="absolute -top-20 -right-20 h-64 w-64 rounded-full bg-white/10 blur-2xl pointer-events-none" />
 
             <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-orange-600 font-bold text-sm shadow">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+                  <span className="flex h-7 w-7 sm:h-10 sm:w-10 items-center justify-center rounded-lg sm:rounded-xl bg-white text-orange-600 font-bold text-[11px] sm:text-sm shadow shrink-0">
                     रोटी
                   </span>
-                  <div>
-                    <span className="font-bold tracking-tight text-lg">RotiOnWheels</span>
-                    <p className="text-[10px] opacity-75 font-medium tracking-widest uppercase">Arham Yuva Seva Group</p>
+                  <div className="min-w-0 truncate">
+                    <span className="font-bold tracking-tight text-xs sm:text-lg block truncate">RotiOnWheels</span>
+                    <p className="text-[8px] sm:text-[10px] opacity-75 font-medium tracking-widest uppercase truncate">Arham Yuva Seva Group</p>
                   </div>
                 </div>
-                <Badge className="border-white/30 bg-white/20 backdrop-blur-sm text-current">
-                  <Heart className="h-3 w-3 mr-1 fill-current" /> 100% Volunteer Seva
+                <Badge className="border-white/30 bg-white/20 backdrop-blur-sm text-current text-[9px] sm:text-xs px-1.5 py-0.5 sm:px-2.5 sm:py-1 shrink-0 whitespace-nowrap">
+                  <Heart className="h-2.5 w-2.5 sm:h-3 sm:w-3 mr-1 fill-current inline-block" /> 100% Volunteer Seva
                 </Badge>
               </div>
 
-              <div className="mt-8 sm:mt-12 space-y-2">
-                <p className="text-xs font-bold tracking-widest uppercase opacity-80">SEVA IMPACT CHAMPION</p>
-                <h4 className="font-display text-3xl sm:text-5xl font-bold tracking-tight">
+              <div className="mt-2.5 sm:mt-8 space-y-0.5 sm:space-y-2">
+                <p className="text-[8px] sm:text-xs font-bold tracking-widest uppercase opacity-80">SEVA IMPACT CHAMPION</p>
+                <h4 className="font-display text-base sm:text-3xl md:text-5xl font-bold tracking-tight truncate leading-tight">
                   {donorName || 'A Kind Neighbor'}
                 </h4>
-                <p className="text-lg sm:text-2xl font-semibold opacity-95">
+                <p className="text-[11px] sm:text-lg md:text-2xl font-semibold opacity-95 leading-tight">
                   Sponsored <span className="underline decoration-wavy underline-offset-4">{rotiCount} Fresh Rotis</span> Today!
                 </p>
               </div>
             </div>
 
-            <div className="pt-6 border-t border-white/15 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs opacity-80">
-              <p className="italic">“A full plate says: you matter.”</p>
-              <p className="font-semibold">rotionwheels.org · Ahmedabad</p>
+            <div className="pt-2 sm:pt-6 border-t border-white/15 flex flex-row items-center justify-between gap-2 text-[8px] sm:text-xs opacity-80">
+              <p className="italic truncate">“A full plate says: you matter.”</p>
+              <p className="font-semibold shrink-0">rotionwheels.org</p>
             </div>
           </div>
           <canvas ref={canvasRef} className="hidden" />
