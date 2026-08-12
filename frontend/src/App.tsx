@@ -63,6 +63,7 @@ import { BannerGenerator } from '@/components/BannerGenerator'
 import { RotiGame } from '@/components/RotiGame'
 import { ImpactCalculator } from '@/components/ImpactCalculator'
 import { UpiPaymentModal } from '@/components/UpiPaymentModal'
+import { SevaLoader } from '@/components/SevaLoader'
 import { AuthPage } from '@/pages/Auth'
 
 const heroImage = '/roti-community-hero.webp'
@@ -1018,12 +1019,34 @@ function Donation() {
 }
 
 export default function App() {
+  const [appLoading, setAppLoading] = useState(true)
+
   return (
-    <Routes>
-      <Route path="/" element={<Home />} />
-      <Route path="/donate" element={<Donation />} />
-      <Route path="/login" element={<AuthPage initialMode="login" />} />
-      <Route path="/signup" element={<AuthPage initialMode="signup" />} />
-    </Routes>
+    <>
+      <AnimatePresence>
+        {appLoading && (
+          <motion.div
+            key="app-loader"
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            className="fixed inset-0 z-[100]"
+          >
+            <SevaLoader
+              fullScreen
+              durationMs={3600}
+              tagline="Loading kindness, one kilometer at a time."
+              onComplete={() => setAppLoading(false)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/donate" element={<Donation />} />
+        <Route path="/login" element={<AuthPage initialMode="login" />} />
+        <Route path="/signup" element={<AuthPage initialMode="signup" />} />
+      </Routes>
+    </>
   )
 }

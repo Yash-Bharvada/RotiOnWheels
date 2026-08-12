@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>RotiOnWheels Loader</title>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    body { background: #0c0805; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    #wheelA, #wheelB { animation: spin .3s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    #sub { animation: fade 1.6s ease-in-out infinite; }
+    @keyframes fade { 50% { opacity: 0.45; } }
+  </style>
+</head>
+<body>
+  <div style="background:#150E09;border:1px solid rgba(243,230,200,0.14);border-radius:14px;padding:40px 32px 30px;width:100%;max-width:680px;margin:0 20px;box-sizing:border-box;">
+    <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+      <span id="pct" style="color:#F2A93B;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;">0%</span>
+    </div>
+    <div id="truckWrap" style="position:relative;height:0;">
+      <svg id="truck" width="86" height="42" viewBox="0 0 86 42" style="position:absolute;top:-42px;left:0;will-change:left;">
+        <rect x="2" y="4" width="52" height="24" rx="3" fill="#F3E6C8"/>
+        <rect x="2" y="4" width="52" height="8" fill="#241811"/>
+        <rect x="7" y="13" width="42" height="13" rx="1" fill="#D65B1F"/>
+        <text x="28" y="22" text-anchor="middle" font-family="Arial,sans-serif" font-size="8" font-weight="700" fill="#FBF1DE">ARHAM</text>
+        <path d="M54 28 L54 10 L64 10 L74 18 L74 28 Z" fill="#D65B1F"/>
+        <rect x="57" y="13" width="9" height="7" rx="1" fill="#F2A93B"/>
+        <circle cx="17" cy="30" r="8" fill="#150E09"/>
+        <g id="wheelA" style="transform-box:fill-box;transform-origin:center;">
+          <circle cx="17" cy="30" r="5" fill="#241811"/>
+          <line x1="17" y1="25" x2="17" y2="35" stroke="#8C7A63" stroke-width="1"/>
+          <line x1="12" y1="30" x2="22" y2="30" stroke="#8C7A63" stroke-width="1"/>
+        </g>
+        <circle cx="63" cy="30" r="8" fill="#150E09"/>
+        <g id="wheelB" style="transform-box:fill-box;transform-origin:center;">
+          <circle cx="63" cy="30" r="5" fill="#241811"/>
+          <line x1="63" y1="25" x2="63" y2="35" stroke="#8C7A63" stroke-width="1"/>
+          <line x1="58" y1="30" x2="68" y2="30" stroke="#8C7A63" stroke-width="1"/>
+        </g>
+      </svg>
+    </div>
+    <div id="track" style="position:relative;height:14px;background:#241811;border:1px solid rgba(243,230,200,0.14);border-radius:6px;overflow:hidden;">
+      <div id="fill" style="position:absolute;top:0;left:0;height:100%;width:0%;background-color:#D65B1F;border-radius:6px;will-change:width;"></div>
+    </div>
+    <div id="sub" style="text-align:center;color:#8C7A63;font-family:'Manrope',sans-serif;font-size:13px;margin-top:26px;">Loading kindness, one kilometer at a time.</div>
+  </div>
+
+  <script>
+    (function(){
+      var track=document.getElementById('track');
+      var fill=document.getElementById('fill');
+      var truck=document.getElementById('truck');
+      var pct=document.getElementById('pct');
+      var duration=3600;
+      var start=null;
+
+      function loop(ts){
+        if(!start)start=ts;
+        var elapsed=(ts-start)%duration;
+        var progress=(elapsed/duration)*100;
+        
+        pct.textContent=Math.round(progress)+'%';
+        fill.style.width=progress+'%';
+        
+        var trackWidth=track.clientWidth;
+        var truckWidth=86;
+        var fillPx=(progress/100)*trackWidth;
+        var left=fillPx-63;
+        if(left<0)left=0;
+        if(left>trackWidth-truckWidth)left=trackWidth-truckWidth;
+        
+        truck.style.left=left+'px';
+        requestAnimationFrame(loop);
+      }
+      requestAnimationFrame(loop);
+    })();
+  </script>
+</body>
+</html>
