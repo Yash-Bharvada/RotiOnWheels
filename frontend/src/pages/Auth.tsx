@@ -8,14 +8,13 @@ import {
   ArrowLeft,
   Eye,
   EyeOff,
-  Sparkles,
   CheckCircle2,
   AlertCircle,
   Loader2,
   Heart,
   ShieldCheck
 } from 'lucide-react'
-import { Button, Input, Label, Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
+import { Button, Input, Label, Card, CardContent } from '@/components/ui'
 import { supabase } from '@/lib/supabase'
 
 interface AuthProps {
@@ -48,14 +47,15 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
   const [errorMsg, setErrorMsg] = useState<string | null>(null)
   const [successMsg, setSuccessMsg] = useState<string | null>(null)
 
-  // Redirect if already logged in
+  // Redirect if already logged in (send them to where they came from, or home)
+  const from = (location.state as any)?.from?.pathname ?? '/'
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/')
+        navigate(from, { replace: true })
       }
     })
-  }, [navigate])
+  }, [navigate, from])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -100,7 +100,7 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
 
         if (data.session) {
           setSuccessMsg('Account created successfully! Redirecting...')
-          setTimeout(() => navigate('/'), 1200)
+          setTimeout(() => navigate(from, { replace: true }), 1200)
         } else {
           setSuccessMsg('Account created! Please check your email to confirm your registration.')
         }
@@ -114,7 +114,7 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
 
         if (data.session) {
           setSuccessMsg('Signed in successfully! Redirecting...')
-          setTimeout(() => navigate('/'), 1000)
+          setTimeout(() => navigate(from, { replace: true }), 1000)
         }
       }
     } catch (err: any) {
@@ -131,13 +131,34 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/`
+          // /auth/callback exchanges the PKCE code for a session
+          redirectTo: `${window.location.origin}/auth/callback`
         }
       })
       if (error) throw error
     } catch (err: any) {
       setErrorMsg(err.message || 'Google sign-in failed. Please try again.')
       setSocialLoading(false)
+    }
+  }
+
+  const handleForgotPassword = async () => {
+    setErrorMsg(null)
+    if (!email) {
+      setErrorMsg('Please enter your email address above, then click Forgot password.')
+      return
+    }
+    setLoading(true)
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`
+      })
+      if (error) throw error
+      setSuccessMsg('Password reset link sent! Check your email inbox.')
+    } catch (err: any) {
+      setErrorMsg(err.message || 'Failed to send reset email. Please try again.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -303,16 +324,13 @@ export function AuthPage({ initialMode = 'login' }: AuthProps) {
                         Password
                       </Label>
                       {!isSignUp && (
-                        <a
-                          href="#forgot"
-                          onClick={(e) => {
-                            e.preventDefault()
-                            alert('Password reset link will be sent to your email if registered.')
-                          }}
+                        <button
+                          type="button"
+                          onClick={handleForgotPassword}
                           className="text-[11px] font-semibold text-primary hover:underline"
                         >
                           Forgot password?
-                        </a>
+                        </button>
                       )}
                     </div>
                     <div className="relative">
